@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>미션 성공 인증</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #ffffff; 
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            color: #34495e;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: #3498db;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .form-group label {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea,
+        .form-group input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            margin-top: 5px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        .form-group textarea {
+            height: 120px;
+        }
+
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .submit-btn:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e8f5e9;
+            border-radius: 8px;
+            text-align: left;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .result h3 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            color: #27ae60;
+        }
+
+        .result p {
+            font-size: 1.1rem;
+            color: #34495e;
+        }
+
+        .image-preview {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .image-preview img {
+            max-width: 80%; 
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .container img {
+            max-width: 90%; 
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+
+        .home-btn {
+            display: inline-block;
+            padding: 12px 20px;
+            background-color: #3498db;
+            color: white;
+            font-size: 1.2rem;
+            text-decoration: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .home-btn:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .home-btn:active {
+            background-color: #3498db;
+            transform: scale(1);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .title {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.2rem;
+            }
+
+            .submit-btn, .home-btn {
+                font-size: 1rem;
+                padding: 10px;
+            }
+
+            .form-group input[type="text"],
+            .form-group textarea {
+                font-size: 1rem;
+            }
+
+            .result p {
+                font-size: 1rem;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <img src="/static/img3/godlife.jpg" alt="godlife">
+        <div class="title">미션 성공 인증</div>
+        
+        {% if user_data %}
+            <p>미션: {{ plan }}</p>
+            
+            {% if check %}
+                <div class="result">
+                    <h3>미션 info</h3>
+                    <p>완료 여부: {{ "★" if complete else "☆" }}</p>
+                    <p>내용: {{ content }}</p>
+                    <div class="image-preview">
+                        {% if photo %}
+                            <img src="{{ url_for('static', filename=photo) }}" alt="Uploaded Photo">
+                        {% else %}
+                            <p>업로드된 사진이 없습니다.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% else %}
+                <form method="post" enctype="multipart/form-data" action="{{ url_for('upload_done2') }}">
+                    <input type="hidden" name="plan" value="{{ plan }}">
+                    
+                    <div class="form-group">
+                        <label for="complete">완료 여부</label>
+                        <input type="checkbox" name="complete" id="complete" {% if complete %}checked{% endif %}>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="content">내용</label>
+                        <textarea name="content" id="content" placeholder="내용을 입력하세요" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="file">사진 업로드</label>
+                        <input type="file" name="file" id="file">
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">제출</button>
+                </form>
+            {% endif %}
+        {% else %}
+            <p>회원 정보가 없습니다.</p>
+        {% endif %}
+        
+        <a href="/home" class="home-btn">홈 화면으로</a>
+    </div>
+</body>
+</html>

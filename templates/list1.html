@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오늘의 미션</title>
+     <style>
+       body {
+            font-family: 'Arial', sans-serif; 
+            background-color: #ffffff; 
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .plan-container {
+            width: 100%;
+            height: 100%; 
+            max-width: 600px; 
+            max-height: 800px; 
+            background-color: #ffffff;
+            border-radius: 15px; 
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s ease-in-out; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-y: auto; 
+        }
+
+        .plan-container:hover {
+            transform: scale(1.05); 
+        }
+
+        .plan-title {
+            font-size: 3rem; 
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 30px; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .mission-box {
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .plan-item {
+            font-size: 1.4rem;
+            color: #333333; 
+            padding: 12px;
+            margin-bottom: 10px; 
+            border-radius: 8px; 
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+            transition: background-color 0.3s ease; 
+            word-wrap: break-word;
+        }
+
+        .plan-item:last-child {
+            margin-bottom: 0; 
+        }
+
+        .plan-item:hover {
+            background-color: #dfe6e9; 
+        }
+
+        .plan-item a {
+            text-decoration: none;
+            color: #2c3e50;
+            transition: color 0.3s ease; 
+        }
+
+        .plan-item a:hover {
+            color: #2980b9; 
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            font-size: 1.2rem;
+            color: #3498db;
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: #ffffff;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .back-link:hover {
+            background-color: #3498db; 
+            color: #ffffff; 
+        }
+
+        .back-link:active {
+            background-color: #2980b9; 
+        }
+
+        @media (max-width: 768px) {
+            .plan-container {
+                width: 95%; 
+                padding: 20px;
+            }
+
+            .plan-title {
+                font-size: 2.4rem; 
+            }
+
+            .plan-item {
+                font-size: 1.2rem;
+            }
+
+            .back-link {
+                font-size: 1rem;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="plan-container">
+        <img src="/static/img3/godlife.jpg" alt="godlife" style="max-width: 100%; height: auto; border-radius: 10px;">
+        <div class="plan-title">오늘의 미션!</div>
+        
+        <div class="mission-box">
+            {% if user_data %}
+                <div id="plan-items"></div>
+            {% else %}
+                <p>회원 정보가 없습니다.</p>
+            {% endif %}
+        </div>
+
+        <a class="back-link" href="/home">홈 화면으로</a>
+    </div>
+
+    <script>
+    const num = 4;
+
+    const programList = {{ program_list | tojson }};
+    
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function generatePlans() {
+        shuffle(programList);
+        return programList.slice(0, num); 
+    }
+    
+    function savePlans(plans) {
+        localStorage.setItem('dailyPlans', JSON.stringify(plans));
+        localStorage.setItem('lastGeneratedDate', new Date().toISOString().split('T')[0]);
+    }
+    
+    function getSavedPlans() {
+        const savedPlans = localStorage.getItem('dailyPlans');
+        const savedDate = localStorage.getItem('lastGeneratedDate');
+        const today = new Date().toISOString().split('T')[0];
+
+        if (savedPlans && savedDate !== today) {
+            const plans = generatePlans();
+            savePlans(plans);
+            return plans;
+        }
+        
+        if (savedPlans) {
+            return JSON.parse(savedPlans);
+        }
+
+        return null;
+    }
+    
+    function renderPlans(plans) {
+        const planItems = document.getElementById("plan-items");
+        planItems.innerHTML = ""; 
+        plans.forEach((item) => {
+            const div = document.createElement("div");
+            div.className = "plan-item";
+
+            const link = document.createElement("a");
+            link.href = `/give_info?plan=${encodeURIComponent(item)}`;
+            link.textContent = item;
+
+            div.appendChild(link);
+            planItems.appendChild(div);
+        });
+    }
+
+    function initializePlans() {
+        let plans = getSavedPlans();
+        if (!plans) {
+            plans = generatePlans();
+            savePlans(plans);
+        }
+        renderPlans(plans);
+    }
+
+    initializePlans();
+</script>
+</body>
+</html>
